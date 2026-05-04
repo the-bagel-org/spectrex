@@ -1,0 +1,37 @@
+# SPHEREx ROI — .gitignore
+
+# Rust build artifacts
+/target/
+Cargo.lock
+
+# Python build artifacts
+__pycache__/
+build/
+dist/
+wheels/
+*.egg-info
+*.py[oc]
+.venv/
+uv.lock
+
+# Agent working state (not project deliverables)
+.agents-workspace/
+.kilo
+.opencode
+.claude
+AGENTS.md
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+.git
+.jj
+*.swp
+
+# Cache
+.ruff_cache
+
+# Test outputs
+test_*py
+test_*sh
