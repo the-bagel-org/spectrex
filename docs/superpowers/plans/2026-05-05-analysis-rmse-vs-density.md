@@ -117,9 +117,11 @@ cells.append(code(
 cells.append(md("## 1. Build or Load Operator"))
 
 cells.append(code(
-    "config = InstrumentConfig.from_config_dir(\n"
-    "    TESTDATA / 'Config Files',\n"
-    "    TESTDATA / 'SenseConfig' / 'wfss-grism-configuration',\n"
+    "config = InstrumentConfig.from_files(\n"
+    "    conf_path=TESTDATA / 'Config Files' / 'GR150R.F150W.220725.conf',\n"
+    "    wavelengthrange_path=TESTDATA / 'jwst_niriss_wavelengthrange_0002.asdf',\n"
+    "    sensitivity_dir=TESTDATA / 'SenseConfig' / 'wfss-grism-configuration',\n"
+    "    filter_name='F150W',\n"
     ")\n"
     "basis = EigenspectraBasis.from_csv(\n"
     "    TESTDATA / 'eigenspectra_kurucz.csv',\n"

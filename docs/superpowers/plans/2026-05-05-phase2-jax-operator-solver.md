@@ -390,9 +390,11 @@ def test_build_from_calibration():
     from spectrex.basis import EigenspectraBasis
     from spectrex.instrument import InstrumentConfig
 
-    config = InstrumentConfig.from_config_dir(
-        TESTDATA / "Config Files",
-        TESTDATA / "SenseConfig" / "wfss-grism-configuration",
+    config = InstrumentConfig.from_files(
+        conf_path=TESTDATA / "Config Files" / "GR150R.F150W.220725.conf",
+        wavelengthrange_path=TESTDATA / "jwst_niriss_wavelengthrange_0002.asdf",
+        sensitivity_dir=TESTDATA / "SenseConfig" / "wfss-grism-configuration",
+        filter_name="F150W",
     )
     basis = EigenspectraBasis.from_csv(
         TESTDATA / "eigenspectra_kurucz.csv",
@@ -1185,9 +1187,11 @@ def test_jax_full_pipeline():
     from spectrex.jax_solver import JAXProximalSolver
     from spectrex.solver import NoiseModel
 
-    config = InstrumentConfig.from_config_dir(
-        TESTDATA / "Config Files",
-        TESTDATA / "SenseConfig" / "wfss-grism-configuration",
+    config = InstrumentConfig.from_files(
+        conf_path=TESTDATA / "Config Files" / "GR150R.F150W.220725.conf",
+        wavelengthrange_path=TESTDATA / "jwst_niriss_wavelengthrange_0002.asdf",
+        sensitivity_dir=TESTDATA / "SenseConfig" / "wfss-grism-configuration",
+        filter_name="F150W",
     )
     basis = EigenspectraBasis.from_csv(
         TESTDATA / "eigenspectra_kurucz.csv",
