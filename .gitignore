@@ -35,7 +35,7 @@ AGENTS.md
 # Cache
 .ruff_cache
 
-# Test outputs
-test_*py
-test_*sh
+# Test output scripts at repo root (not unittests/ directory)
+/test_*.py
+/test_*.sh
 legacy/
