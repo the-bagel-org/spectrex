@@ -28,3 +28,9 @@ A fast grism spectral extraction code optimized for crowded regions.
 
    Mock example <content/mock_example>
    content/analysis_rmse_vs_density
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Internals
+
+   content/comparison_computational
