@@ -27,3 +27,4 @@ A fast grism spectral extraction code optimized for crowded regions.
    :caption: Examples
 
    Mock example <content/mock_example>
+   content/analysis_rmse_vs_density
