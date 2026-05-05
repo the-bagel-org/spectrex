@@ -126,3 +126,55 @@ def test_public_api():
     import spectrex
     assert hasattr(spectrex, "JAXOperator")
     assert hasattr(spectrex, "JAXProximalSolver")
+
+
+# ── New tests for restart / tol / callback ──────────────────────────────────
+
+def test_callback_called_correct_times(small_problem):
+    """Callback is invoked exactly max_iter times; iter is 1-indexed; wr ≥ 0."""
+    op, _, f = small_problem
+    calls: list[tuple[int, float]] = []
+
+    def cb(i: int, x: np.ndarray, wr: float) -> None:
+        calls.append((i, wr))
+
+    solver = JAXProximalSolver(op, lam=0.01, max_iter=10, tol=0.0, callback=cb)
+    solver.solve(f)
+
+    assert len(calls) == 10, f"Expected 10 calls, got {len(calls)}"
+    assert calls[0][0] == 1, "First callback iter should be 1 (1-indexed)"
+    assert calls[-1][0] == 10, "Last callback iter should be 10"
+    assert all(wr >= 0.0 for _, wr in calls), "All weighted residuals must be ≥ 0"
+
+
+def test_tol_early_stopping(small_problem):
+    """tol > 0 causes solve() to stop before max_iter when converged."""
+    op, _, f = small_problem
+    calls: list[int] = []
+
+    def cb(i: int, x: np.ndarray, wr: float) -> None:
+        calls.append(i)
+
+    # Well-conditioned problem with lam=0 converges quickly — well under 500 iters
+    solver = JAXProximalSolver(op, lam=0.0, max_iter=500, tol=1e-4, callback=cb)
+    solver.solve(f)
+
+    assert len(calls) < 500, (
+        f"Expected early stop before 500 iters, ran {len(calls)}"
+    )
+
+
+def test_restart_does_not_degrade_solution(small_problem):
+    """restart=True produces equivalent solution quality to restart=False."""
+    op, a_true, f = small_problem
+
+    a_no  = JAXProximalSolver(op, lam=0.0, max_iter=100, restart=False).solve(f)
+    a_yes = JAXProximalSolver(op, lam=0.0, max_iter=100, restart=True).solve(f)
+
+    rmse_no  = float(np.sqrt(np.mean((a_no  - a_true) ** 2)))
+    rmse_yes = float(np.sqrt(np.mean((a_yes - a_true) ** 2)))
+
+    # restart must not make reconstruction worse (allow 10% slack for numerical noise)
+    assert rmse_yes <= rmse_no * 1.1 + 1e-4, (
+        f"restart=True RMSE {rmse_yes:.4f} worse than restart=False {rmse_no:.4f}"
+    )
