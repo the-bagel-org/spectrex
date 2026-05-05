@@ -144,6 +144,8 @@ testpaths = ["unittests"]
 dev = [
     "pytest>=9.0.3",
     "ty>=0.0.34",
+    "jupyter>=1.1",
+    "nbformat>=5.10",
 ]
 docs = [
     "pybtex>=0.26.1",
