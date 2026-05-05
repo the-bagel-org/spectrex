@@ -493,7 +493,6 @@ SpectralSolver(operator, noise_model, ...)
 - GPU/TPU execution
 - L1 / proximal gradient solver
 - Support for instruments other than JWST NIRISS (though the architecture supports it)
-- CLI or notebook interface
 - Documentation beyond docstrings
 
 ---
