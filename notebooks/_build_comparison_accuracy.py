@@ -176,7 +176,7 @@ cells.append(code(
     "# --- FISTA (JAXProximalSolver) ---\n"
     "t0 = time.perf_counter()\n"
     "solver_fista = JAXProximalSolver(\n"
-    "    jax_op, noise_model=NOISE_MODEL, lam=0.05, n_iter=200\n"
+    "    jax_op, noise_model=NOISE_MODEL, lam=0.05, max_iter=200\n"
     ")\n"
     "a_rec_fista = solver_fista.solve(f_noisy)  # (K*M,)\n"
     "t_fista = time.perf_counter() - t0\n\n"
@@ -197,7 +197,7 @@ cells.append(code(
     "def reconstruct_spectrum(coeffs_km: np.ndarray, k: int) -> np.ndarray:\n"
     "    \"\"\"Reconstruct spectrum for source k from flat coefficient vector.\"\"\"\n"
     "    c = coeffs_km[k * M : (k + 1) * M]  # (M,)\n"
-    "    return basis.components.T @ c  # (n_wav,)\n\n"
+    "    return basis.components @ c  # (n_wav,)\n\n"
     "wav = config.wavelengths / 1e4  # Convert Angstrom to micron for plot\n\n"
     "fig, axes = plt.subplots(1, K, figsize=(4 * K, 3), sharey=False)\n"
     "for k, ax in enumerate(axes):\n"
@@ -297,6 +297,7 @@ cells.append(code(
     "SWEEP_RNG = np.random.default_rng(2027)\n"
     "REGULARISATION = 1e-2\n"
     "LAM_FISTA = 0.05\n"
+    "print(f'Sweep grid: {N_SOURCES_GRID}, {N_TRIALS} trials each')\n"
 ))
 
 cells.append(md("### Sweep Helper"))
@@ -342,11 +343,13 @@ cells.append(code(
     "    ])\n\n"
     "    # FISTA\n"
     "    a_fista = JAXProximalSolver(\n"
-    "        jx_op, noise_model=noise_model, lam=LAM_FISTA, n_iter=200\n"
+    "        jx_op, noise_model=noise_model, lam=LAM_FISTA, max_iter=200\n"
     "    ).solve(f_noisy_trial)\n\n"
     "    rmse_lsqr  = float(np.sqrt(np.mean((a_lsqr  - a_true)**2)))\n"
     "    rmse_fista = float(np.sqrt(np.mean((a_fista - a_true)**2)))\n"
     "    return {'rmse_lsqr': rmse_lsqr, 'rmse_fista': rmse_fista}\n"
+    "\n"
+    "print('sweep_trial helper defined')\n"
 ))
 
 cells.append(md("### Run Sweep"))
