@@ -148,3 +148,31 @@ def test_solve_regularised_with_noise_model(rectangular_operator):
     )
     result = solver.solve_regularised(f.reshape(2, 2))
     assert np.all(np.isfinite(result))
+
+
+def test_sample_shape_and_type():
+    """sample() preserves shape and dtype of the input array."""
+    nm = NoiseModel(read_noise=5.0)
+    rng = np.random.default_rng(0)
+    image = np.ones((10, 20), dtype=np.float32) * 100.0
+    noisy = nm.sample(image, rng)
+    assert noisy.shape == image.shape
+    assert noisy.dtype == image.dtype  # float32 in → float32 out
+
+
+def test_sample_adds_noise():
+    """sample() output differs from input (noise was added)."""
+    nm = NoiseModel(read_noise=5.0)
+    rng = np.random.default_rng(1)
+    image = np.ones(1000) * 500.0
+    noisy = nm.sample(image, rng)
+    assert not np.allclose(noisy, image)
+
+
+def test_sample_mean_near_input():
+    """sample() mean should be close to input mean over many pixels."""
+    nm = NoiseModel(read_noise=0.0)
+    rng = np.random.default_rng(2)
+    image = np.ones(100_000) * 200.0
+    noisy = nm.sample(image, rng)
+    np.testing.assert_allclose(noisy.mean(), 200.0, rtol=0.01)

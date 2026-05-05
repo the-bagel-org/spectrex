@@ -21,3 +21,9 @@ A fast grism spectral extraction code optimized for crowded regions.
    :caption: API Reference
 
    api/modules
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Examples
+
+   Mock example <content/mock_example>

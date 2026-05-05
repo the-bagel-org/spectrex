@@ -77,6 +77,28 @@ class NoiseModel:
         """
         return 1.0 / np.sqrt(self.variance(f))
 
+    def sample(self, f: np.ndarray, rng: np.random.Generator) -> np.ndarray:
+        """Draw a noisy realisation of pixel values.
+
+        Adds zero-mean Gaussian noise with ``σ² = variance(f)`` to the
+        input array.  This is an approximation to Poisson + read noise
+        suitable for mock data generation.
+
+        Parameters
+        ----------
+        f : np.ndarray
+            Noiseless pixel values.
+        rng : np.random.Generator
+            NumPy random generator (e.g. ``np.random.default_rng(42)``).
+
+        Returns
+        -------
+        np.ndarray
+            Noisy pixel values with the same shape and dtype as *f*.
+        """
+        sigma = np.sqrt(self.variance(f))
+        return (f + rng.normal(0.0, sigma)).astype(f.dtype)
+
 
 class SpectralSolver:
     """Least-squares solver for WFSS spectral deconvolution.
