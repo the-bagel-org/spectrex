@@ -18,6 +18,7 @@ legacy/
 
 # Agent working state (not project deliverables)
 .agents-workspace/
+.worktrees/
 .kilo
 .opencode
 .claude
