@@ -14,6 +14,10 @@ NoiseModel
     Poisson + read-noise model.
 SpectralSolver
     LSQR/LSMR solver for grism deconvolution.
+JAXOperator
+    JAX compact-trace forward operator (Phase 2).
+JAXProximalSolver
+    FISTA proximal solver with group-L1 regularisation (Phase 2).
 """
 
 import logging as _logging
@@ -23,6 +27,8 @@ from spectrex.basis import EigenspectraBasis
 from spectrex.instrument import InstrumentConfig
 from spectrex.operator import ForwardOperatorProtocol, SciPySparseOperator
 from spectrex.solver import NoiseModel, SpectralSolver
+from spectrex.jax_operator import JAXOperator
+from spectrex.jax_solver import JAXProximalSolver
 
 # Standard library best practice for packages: attach a NullHandler so the
 # library never emits "No handlers could be found" warnings when the caller
@@ -44,5 +50,7 @@ __all__ = [
     "SciPySparseOperator",
     "NoiseModel",
     "SpectralSolver",
+    "JAXOperator",
+    "JAXProximalSolver",
     "logger",
 ]
