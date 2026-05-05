@@ -50,7 +50,10 @@ docs = [
   # for syntax highlighting (https://nbsphinx.readthedocs.io/en/0.8.0/installation.html#Pygments-Lexer-for-Syntax-Highlighting)
   "IPython>=8.0",
   "matplotlib",
-  "numpydoc"]
+  "numpydoc",
+  "pybtex>=0.26.1",
+  "sphinxcontrib-bibtex>=2.6.5",
+]
 
 testing = [
     "pytest",
@@ -132,3 +135,8 @@ unfixable = []
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
+
+[dependency-groups]
+docs = [
+    "pybtex>=0.26.1",
+]

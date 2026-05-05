@@ -1,6 +1,6 @@
 # specTrex
 
-![trex mixed with spectra](docs/assests/logo.png)
+![trex mixed with spectra](docs/assets/logo.png)
 
 
 To use my implemented functions: 
