@@ -59,7 +59,7 @@ testing = [
 
 [project.urls]
 "Bug Tracker" = "https://github.com/the-bagel-org/spectrex/issues"
-"Source Code" = "https://github.com/mpi-astronomy/spectrex"
+"Source Code" = "https://github.com/the-bagel-org/spectrex"
 
 [build-system]
 requires = [
