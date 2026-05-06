@@ -96,6 +96,88 @@ notebooks to record the residual norm convergence curve.
    higher than LSQR's; this is not a defect.
 
 
+Regularisation
+--------------
+
+The regularisation term determines what structure is imposed on the recovered
+coefficients beyond fitting the data.  :math:`\mathbf{a}` is a stacked vector
+of K sub-vectors, one per source:
+
+.. math::
+
+   \mathbf{a} = [\mathbf{a}_1,\, \mathbf{a}_2,\, \ldots,\, \mathbf{a}_K]
+   \qquad \mathbf{a}_k \in \mathbb{R}^M
+
+where M is the number of PCA basis components
+(:attr:`~spectrex.EigenspectraBasis.n_components`).  Three penalties are
+relevant for this problem:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 40 42
+
+   * - Name
+     - Penalty
+     - Promotes
+   * - Ridge (Tikhonov)
+     - :math:`\lambda \|\mathbf{a}\|_2^2 = \lambda \sum_k \sum_m a_{km}^2`
+     - No sparsity — smoothly shrinks all coefficients toward zero.
+       Implemented in :class:`~spectrex.SpectralSolver`.
+   * - Group lasso *(current JAX)*
+     - :math:`\lambda \sum_k \|\mathbf{a}_k\|_2`
+     - **Source sparsity** — the entire coefficient vector
+       :math:`\mathbf{a}_k` is zeroed when the source is absent.
+       Individual elements within a non-zero group are not independently zeroed.
+       Implemented in :class:`~spectrex.JAXProximalSolver`.
+   * - Lasso *(planned)*
+     - :math:`\lambda \sum_k \|\mathbf{a}_k\|_1 = \lambda \sum_k \sum_m |a_{km}|`
+     - **Coefficient sparsity** — only a few basis components are active
+       per source; the rest are driven to exactly zero.
+       Planned for a future release.
+   * - Sparse group lasso *(planned)*
+     - :math:`\alpha \sum_k \|\mathbf{a}_k\|_2 + (1-\alpha)\sum_k \|\mathbf{a}_k\|_1`
+     - Both: few active sources **and** few components per source.
+       Planned for a future release.
+
+**Why is group lasso called "group-L1"?**
+
+The "L1" refers to the norm taken *across groups*, not *within* each group.
+Each source's coefficient vector is first summarised by its Euclidean (L2) norm
+:math:`\|\mathbf{a}_k\|_2` — a single non-negative scalar.  Those K scalars are
+then summed linearly (L1 norm), not squared:
+
+.. math::
+
+   \lambda \sum_k \|\mathbf{a}_k\|_2
+   \;=\;
+   \lambda
+   \bigl\|
+     \bigl(\|\mathbf{a}_1\|_2,\; \ldots,\; \|\mathbf{a}_K\|_2\bigr)
+   \bigr\|_1
+
+By contrast, the plain lasso uses the L1 norm directly on all elements, and
+ridge uses the squared L2 norm on all elements.  The proximal operator for the
+group lasso (block soft-threshold) zeros out the *entire* :math:`\mathbf{a}_k`
+when :math:`\|\mathbf{a}_k\|_2 \leq \lambda/L`; it never zeros a single element
+independently.
+
+**Which prior fits the spectral basis problem?**
+
+The original motivation for regularisation in spectrex is that *a small number
+of PCA basis components should suffice to represent any stellar spectrum*.  That
+assumption is about sparsity *within* each source's coefficient vector — it maps
+to the **lasso** penalty :math:`\sum_k \|\mathbf{a}_k\|_1`, not the group lasso.
+
+The group lasso is the correct prior when many *catalog positions are expected to
+be empty* (source-level sparsity) — the relevant scenario for blind or
+weakly-constrained source detection.
+
+The current :class:`~spectrex.JAXProximalSolver` implements the group lasso,
+which is useful for source-level deblending in crowded fields but does not
+enforce sparsity in the spectral basis coefficients per source.  Adding a lasso
+(and sparse-group-lasso) option is planned; see :doc:`/content/whats_next`.
+
+
 Which Solver?
 -------------
 

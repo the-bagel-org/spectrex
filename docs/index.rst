@@ -12,6 +12,7 @@ A fast grism spectral extraction code optimized for crowded regions.
    :caption: Project
 
    Changelog <content/changelog.md>
+   What's next <content/whats_next.md>
    Contributing <content/contributing.md>
    Code of Conduct <content/conduct.md>
    references
