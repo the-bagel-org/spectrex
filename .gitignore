@@ -44,3 +44,9 @@ notebooks/analysis_operator_cache.npz
 /test_*.py
 /test_*.sh
 legacy/
+
+# NeurIPS paper symlink (points to ../spectrex_neurips_2026_paper; not part of the wheel)
+spectrex_neurips_2026_paper
+
+# nbconvert collision-avoidance duplicates (e.g. foo_1.ipynb created alongside foo.ipynb)
+notebooks/*_[0-9].ipynb
