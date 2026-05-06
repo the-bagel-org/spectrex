@@ -24,6 +24,8 @@ legacy/
 .opencode
 .claude
 AGENTS.md
+.superpowers
+docs/superpowers/
 
 # Editor / OS
 .DS_Store
