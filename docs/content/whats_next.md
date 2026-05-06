@@ -6,8 +6,7 @@ they reflect current thinking and may evolve.
 
 ## Regularisation improvements
 
-The most concrete near-term item is fixing a mismatch between the stated goal and
-the current regularisation.
+The most concrete near-term item is an update in the regularisation.
 
 The original motivation for regularisation in spectrex is that *a small number of
 PCA basis components should suffice to represent any stellar spectrum* — sparsity
@@ -18,7 +17,10 @@ The current `JAXProximalSolver` implements the **group lasso**
 $\sum_k \|\mathbf{a}_k\|_2$ instead, which promotes **source-level sparsity** —
 driving the *entire* coefficient vector of an absent source to zero.  This is
 useful for deblending in crowded fields but does not enforce sparsity in the
-spectral basis per source.
+spectral basis per source. 
+
+We will therefore update our solver to use sparsity of the spectral dimension per source (L1 penalty) and group lasso will remain for the spatial distribution of sources.
+(More on that later).
 
 Planned additions to `JAXProximalSolver`:
 
@@ -30,11 +32,9 @@ Planned additions to `JAXProximalSolver`:
 See {doc}`/api/solvers` for a full explanation of the three penalties and their
 proximal operators.
 
----
-
 ## Uncertainty quantification
 
-FISTA currently returns a MAP point estimate — no error bars.  For downstream
+FISTA currently returns a MAP point estimate, i.e no error bars.  For downstream
 science (stellar populations, redshifts, variability) credible intervals on the
 reconstructed spectra are essential.
 
@@ -43,18 +43,12 @@ Planned approaches, from simplest to most rigorous:
 - **Support-conditioned Gaussian** — fix the active set (non-zero coefficients),
   compute a Gaussian posterior on that reduced problem.  Cheap; ignores support
   uncertainty.
-- **Monte Carlo noise propagation** — re-solve under noise realisations; empirical
-  credible intervals at the cost of N solver calls.
-- **MCMC / variational inference** — full posterior via BlackJAX or NumPyro,
-  directly on the JAX compute graph.
-
----
+- **MCMC / variational inference** — full posterior via NumPyro,
+  directly on the JAX compute graph. This is best for scientific outcomes.
 
 ## Scaling to the full detector
 
-The current implementation targets stamp-sized cutouts (~500 × 20 px).  A full
-NIRISS detector is 2048 × 2048 px with potentially thousands of sources and
-heavily overlapping Order A traces.
+The current implementation targets stamp-sized cutouts (~500 × 20 px) primarily for the mathematical developments.  A full NIRISS detector is 2048 × 2048 px with potentially thousands of sources and heavily overlapping Order A traces.
 
 Key challenges:
 
@@ -69,15 +63,12 @@ Key challenges:
   not contain the source itself.
 
 The `JAXOperator` compact trace design was chosen to accommodate this path; no
-fundamental redesign is anticipated.
-
----
+fundamental redesign is anticipated. The development is primarily benchmarking and putting guardrails on the Scipy based operator.
 
 ## Source detection with a weak or absent positional prior
 
 The current pipeline requires a source catalog with known positions (e.g. from a
-direct image).  When positions are uncertain or unavailable, unmodelled sources
-produce residuals that bias neighbour reconstructions.
+direct image). While this is not a challenge to detect sources on the direct image, it would be good to account for situations when positions are uncertain or unavailable, unmodelled sources produce residuals that bias neighbour reconstructions.
 
 Planned approaches in order of increasing complexity:
 
@@ -88,7 +79,7 @@ Planned approaches in order of increasing complexity:
    continuous latent variables; optimise jointly via JAX autodiff through
    `get_trace`.
 3. **Sparse recovery in source-position space** — L0/L1 penalty on a dense grid
-   of candidate positions; research-grade.
+   of candidate positions; research-grade (a paper on its own).
 
 Full-detector scaling (above) is a practical prerequisite for field-wide source
 detection.
