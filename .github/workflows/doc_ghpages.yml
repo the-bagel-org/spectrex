@@ -43,6 +43,8 @@ jobs:
         working-directory: ./
         run: |
           uv sync -p 3.12 --extra docs
+      - name: Install graphviz
+        run: sudo apt-get install -y graphviz
       - name: sphinx-action@master
         working-directory: ./docs
         run: |
