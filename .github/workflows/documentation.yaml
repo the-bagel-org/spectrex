@@ -6,7 +6,7 @@ on:
       - "joss/**"
       - "paper/**"
     branches:
-      - master
+      - main
 
 jobs:
   build:
