@@ -1,4 +1,4 @@
 # specTrex
 
-![trex mixed with spectra](docs/assets/logo.png)
+![trex mixed with spectra](docs/assets/logo_new.png)
 
