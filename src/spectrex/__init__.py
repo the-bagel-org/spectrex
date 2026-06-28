@@ -29,6 +29,8 @@ from spectrex.operator import ForwardOperatorProtocol, SciPySparseOperator
 from spectrex.solver import NoiseModel, SpectralSolver
 from spectrex.jax_operator import JAXOperator
 from spectrex.jax_solver import JAXProximalSolver
+from spectrex.real_images import RealImages
+from spectrex.mock_images import MockImages
 
 # Standard library best practice for packages: attach a NullHandler so the
 # library never emits "No handlers could be found" warnings when the caller
@@ -52,5 +54,7 @@ __all__ = [
     "SpectralSolver",
     "JAXOperator",
     "JAXProximalSolver",
+    "RealImages",
+    "MockImages",
     "logger",
 ]

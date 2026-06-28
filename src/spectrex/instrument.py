@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 # PCA basis wavelength limits in Angstrom
 _WAV_MIN_ANGSTROM: float = 7000.0
-_WAV_MAX_ANGSTROM: float = 22000.0
+_WAV_MAX_ANGSTROM: float = 23000.0
 
 # GrismTrace order letter -> sensitivity file order integer
 _ORDER_LETTER_TO_INT: dict[str, int] = {"A": 1, "B": 0, "C": 2}
@@ -99,7 +99,15 @@ class InstrumentConfig:
 
         grism = Path(conf_path).stem.split(".")[0]
         orders = list(trace.orders)
-
+        orders_ABC = []
+        for i in orders:
+            if i =="A" or i==1:
+                orders_ABC.append(i)
+            if i =="B" or i==0:
+                orders_ABC.append(i)
+            if i == "C" or i==2:
+                orders_ABC.append(i)
+        orders = orders_ABC #only includes A, B, C orders
         sensitivity: dict[str, np.ndarray] = {}
         for order_letter in orders:
             order_int = _ORDER_LETTER_TO_INT.get(order_letter)

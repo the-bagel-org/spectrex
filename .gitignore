@@ -47,3 +47,15 @@ legacy/
 
 # NeurIPS paper symlink (points to ../spectrex_neurips_2026_paper; not part of the wheel)
 spectrex_neurips_2026_paper
+# pixi environments
+.pixi/*
+!.pixi/config.toml
+
+# images
+mast_downloads/*
+
+# operator
+*.npz
+
+# results
+unittests/Images/*
