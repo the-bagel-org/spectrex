@@ -121,7 +121,9 @@ def test_build_shape(tmp_path):
     comps = np.abs(rng.standard_normal((n_wav, n_comp)))  # positive for realism
     comps.setflags(write=False)
     wav_ro = wav.copy(); wav_ro.setflags(write=False)
-    basis = EigenspectraBasis(wavelengths=wav_ro, components=comps, n_components=n_comp)
+    basis = EigenspectraBasis(
+        wavelengths=wav_ro, mean=np.zeros(n_wav), components=comps, n_components=n_comp
+    )
 
     # Mock config: traces go to pixel (x0+1, y0) for all wavelengths
     config = MagicMock()
@@ -160,7 +162,9 @@ def test_build_apply_shape(tmp_path):
     comps = np.abs(rng.standard_normal((n_wav, n_comp)))
     comps.setflags(write=False)
     wav_ro = wav.copy(); wav_ro.setflags(write=False)
-    basis = EigenspectraBasis(wavelengths=wav_ro, components=comps, n_components=n_comp)
+    basis = EigenspectraBasis(
+        wavelengths=wav_ro, mean=np.zeros(n_wav), components=comps, n_components=n_comp
+    )
 
     config = MagicMock()
     config.orders = ["A"]

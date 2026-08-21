@@ -26,6 +26,7 @@ class EigenspectraBasis:
     """
 
     wavelengths: np.ndarray
+    mean: np.ndarray
     components: np.ndarray
     n_components: int
 
@@ -56,7 +57,13 @@ class EigenspectraBasis:
         """
         data = np.genfromtxt(csv_path, delimiter=",", skip_header=1)
         wav_angstrom = data[:, 0] * 1e4  # µm -> Angstrom
-        components_raw = data[:, 1:]
+        # First column after wavelength is the PCA mean (continuum); the
+        # remaining columns are the principal axes. We keep the mean as the
+        # *first* basis column so the forward model (operator + reconstruct)
+        # can represent the continuum. Treating it as a free coefficient makes
+        # column 0 recover each source's overall amplitude, which is exactly
+        # what the dispersed image carries.
+        comp_raw = data[:, 1:]
 
         lo, hi = wav_angstrom.min(), wav_angstrom.max()
         if wavelengths.min() < lo or wavelengths.max() > hi:
@@ -66,9 +73,9 @@ class EigenspectraBasis:
                 f"[{lo:.0f}, {hi:.0f}] Å."
             )
 
-        n_components = components_raw.shape[1]
+        n_components = comp_raw.shape[1]
         interpolated = np.column_stack([
-            np.interp(wavelengths, wav_angstrom, components_raw[:, m])
+            np.interp(wavelengths, wav_angstrom, comp_raw[:, m])
             for m in range(n_components)
         ])
         interpolated.setflags(write=False)
@@ -81,24 +88,49 @@ class EigenspectraBasis:
         )
         return cls(
             wavelengths=wav_copy,
+            mean=interpolated[:, 0],
             components=interpolated,
             n_components=n_components,
         )
 
     def reconstruct(self, coefficients: np.ndarray) -> np.ndarray:
-        """Reconstruct a spectrum from PCA coefficients.
+        """Reconstruct a spectrum from basis coefficients.
 
         Parameters
         ----------
         coefficients : np.ndarray
-            Shape ``(n_components,)``.
+            Shape ``(n_components,)`` (or ``(n_sources, n_components)``).
+            Coefficient 0 scales the PCA mean (continuum); coefficients
+            1..n scale the principal axes.
 
         Returns
         -------
         np.ndarray
-            Shape ``(n_wav,)`` — flux at each wavelength.
+            Shape ``(n_wav,)`` (or ``(n_sources, n_wav)``) — flux at each
+            wavelength.
         """
-        return self.components @ coefficients
+        return (self.components @ coefficients.T).T
+
+    def project(self, spectrum: np.ndarray) -> np.ndarray:
+        """Project a spectrum onto the principal axes (about the mean).
+
+        Only the principal axes (columns 1..n) are used; the mean (column 0
+        of ``components``) is the continuum offset and is not a principal
+        axis.
+
+        Parameters
+        ----------
+        spectrum : np.ndarray
+            Shape ``(n_wav,)`` — flux at each wavelength.
+
+        Returns
+        -------
+        np.ndarray
+            Shape ``(n_components - 1,)`` coefficients for the principal axes.
+        """
+        axes = self.components[:, 1:]
+        coefficients = axes.T @ (spectrum - self.mean)
+        return coefficients
 
     def integrated_weights(self) -> np.ndarray:
         """Trapezoidal integral of each basis component over wavelength.

@@ -150,35 +150,58 @@ class SciPySparseOperator:
                         )
                         continue
 
-                    x_pix = np.round(x_trace).astype(int)
-                    y_pix = np.round(y_trace).astype(int)
+                    x_float = np.asarray(x_trace, dtype=np.float64)
+                    y_float = np.asarray(y_trace, dtype=np.float64)
 
-                    mask = (
-                        (x_pix >= 0) & (x_pix < n_rows)
-                        & (y_pix >= 0) & (y_pix < n_cols)
+                    # Sub-pixel (bilinear) placement so the model matches the
+                    # simulation, which stamps the PSF at sub-pixel positions.
+                    # Integer rounding alone makes the model systematically
+                    # sharper than the (smooth) data. Each wavelength sample is
+                    # spread across its four nearest pixels with bilinear weights.
+                    x0 = np.floor(x_float).astype(int)
+                    y0 = np.floor(y_float).astype(int)
+                    x1 = x0 + 1
+                    y1 = y0 + 1
+                    dx = (x_float - x0).astype(np.float64)
+                    dy = (y_float - y0).astype(np.float64)
+                    corners = (
+                        (x0, y0, (1.0 - dy) * (1.0 - dx)),
+                        (x0, y1, (1.0 - dy) * dx),
+                        (x1, y0, dy * (1.0 - dx)),
+                        (x1, y1, dy * dx),
                     )
-                    if not np.any(mask):
-                        continue
-
-                    x_valid = x_pix[mask]
-                    y_valid = y_pix[mask]
-                    lam_idx = np.where(mask)[0]
-
-                    # Row indices in H for the dispersed pixels
-                    rows_h = x_valid * n_cols + y_valid   # (n_valid,)
-                    # Phi values at valid wavelengths: (n_valid, h)
-                    phi_valid = Phi[lam_idx, :]
 
                     # Vectorise over basis components — no inner Python loop
                     cols_m = np.arange(k * h, (k + 1) * h)       # (h,)
-                    n_valid = len(rows_h)
-                    rows_block = np.repeat(rows_h, h)              # (n_valid*h,)
-                    cols_block = np.tile(cols_m, n_valid)          # (n_valid*h,)
-                    data_block = phi_valid.ravel(order="C")        # (n_valid*h,)
+                    for cx_arr, cy_arr, w_arr in corners:
+                        m = (
+                            (w_arr > 0.0)
+                            & (cx_arr >= 0)
+                            & (cx_arr < n_rows)
+                            & (cy_arr >= 0)
+                            & (cy_arr < n_cols)
+                        )
+                        if not np.any(m):
+                            continue
+                        cxv = cx_arr[m]
+                        cyv = cy_arr[m]
+                        lam_idx = np.where(m)[0]
+                        wv = w_arr[m]
 
-                    row_idx.append(rows_block)
-                    col_idx.append(cols_block)
-                    data_list.append(data_block)
+                        # Row indices in H for the dispersed pixels
+                        rows_h = cxv * n_cols + cyv             # (n_valid,)
+                        # Phi values at valid wavelengths, scaled by the
+                        # bilinear weight: (n_valid, h)
+                        phi_valid = Phi[lam_idx, :] * wv[:, None]
+
+                        n_valid = len(rows_h)
+                        rows_block = np.repeat(rows_h, h)        # (n_valid*h,)
+                        cols_block = np.tile(cols_m, n_valid)    # (n_valid*h,)
+                        data_block = phi_valid.ravel(order="C")  # (n_valid*h,)
+
+                        row_idx.append(rows_block)
+                        col_idx.append(cols_block)
+                        data_list.append(data_block)
 
             logger.debug("Built H contributions for order %s.", order)
 
