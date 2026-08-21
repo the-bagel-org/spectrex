@@ -39,6 +39,8 @@ docs/superpowers/
 .ruff_cache
 notebooks/operator_cache.npz
 notebooks/analysis_operator_cache.npz
+notebooks/*png
+notebooks/simulated_data
 
 # Test output scripts at repo root (not unittests/ directory)
 /test_*.py
